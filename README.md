@@ -1,84 +1,117 @@
-tools and pipelines that help with deep sequencing analysis
+tools and pipelines for deep sequencing analysis
 
-# Variant discovery
-this pipeline was optimised for mutagen induced SNP discovery in sequence data from exome capture experiments. However, flexible options allow wide application for variant analysis in any deep sequencing data.
+# Mutant Discovery
+This pipeline was optimised for mutagen induced SNP discovery in sequence data from exome capture experiments. However, flexible options allow wide application for variant analysis in any deep sequencing data.
 
-written for Python 2.7 - certain features may not be compatible with Python 3
+## Tool descriptions
 
-<Noisefinder.pyc>
-
-    Description: 
-        Regions rich in mismatches/poor coverage after read alignment can often signify misalignment or mixed alignment due to allelism, polyploidy, or presence/absemce variation. Given a pileup file, noisefinder reports regions containing a density of SNVs above a user defined threshold over a given min length and min read depth (prints to STDOUT).
-    Options:
-        '-i', '--infile', 'indicate input pileup. Leave out option if piping from STDIN. Best if pileups generated with -a/-aa option (samtools > v1.4)'
-        '-d', '--mindep', 'set min depth. Only bases with read coverage equal to or above this number are considered for SNV calling (default=5)'
-        '-l', '--minlen', 'set min length. Only compute SNV frequency for regions above this length (default=300)'
-        '-c', '--regnf', 'set min density (frequency over region) of SNVs. Only report regions, contigs having a SNV density higher than or equal to this (default=0.005 aka 1/200 bases)'
-        '-b', '--basef', 'set min frequency of mismatch at base to call a SNV (default=0.2)'
-        '-a', '--addlc', 'indicate True to include regions below depth cutoff in final output (these are not SNV counted but marked with "xxx" in last field)'
-    Library dependencies:
-        '__future__', 'argparse', 'csv', 'sys', 're'
+### Noisefinder.pyc
+Regions rich in mismatches/poor coverage after read alignment can often signify misalignment or mixed alignment due to allelism, polyploidy, or presence/absemce variation. Given a pileup file, noisefinder reports regions containing a density of SNVs above a user defined threshold over a given min length and min read depth (prints to STDOUT).
     
-<SNPlogger.pyc>
+### SNPlogger.pyc
+Will parse an mpileup file and log all SNPs and indels that satisfy parameters. Final tally printed to STDOUT. Outfile is formatted as tab sep fields: <seqid> <position(1based)> <polymorphic-type> <frequency(float)>. Compatible with STDIN.
 
-    Description:
-        SNPlogger will parse an mpileup file and log all SNPs and indels that satisfy parameters. Final tally printed to STDOUT. Outfile is formatted as tab sep fields: <seqid> <position(1based)> <polymorphic-type> <frequency(float)>. Compatible with STDIN.
-    Options:
-        '-i', '--input', 'indicate input.pileup (leave out if using STDIN). Best if pileups generated with -a/-aa option (samtools > v1.4).')
-        '-o', '--output', 'indicate output file'
-        '-d', '--mindep', 'set min depth. Only bases with read coverage equal to or above this number are considered for SNP or indel calling (default=5)'
-        '-f', '--minfrq', 'set min frequency of any mismatch at base to call a SNP (default=0.2). Default threshold will call mixed allelic SNVs. Note: Ns in reference not counted for SNPs.'
-        '-x', '--idfrq', 'set min frequency of indel to report an indel (default=0.8)'
-        '-b', '--blacklist', 'provide a noisefinder outfile listing contig regions to omit from analysis.'
-        '-a', '--appendbl', 'indicate a noisefinder outfile to append its contents to SNPlogger out in adjusted format. Or indicate "True" to use same file as in -b/--blacklist (can be useful to include poor coverage/alignment zones in subsequent mutant analysis - <position> field contains start of low coverage or noisy alignment region rounded to nearest hundred).'
-    Library dependencies:
-        '__future__', 'argparse', 'csv', 'sys', 're'
-    
-<SNPtracker.pyc>
+### SNPtracker.pyc
+Finds sequence IDs/regions with coinciding polymorphic features across multiple SNPlogger generated files
 
-    Description:
-        Finds sequence IDs/regions with coinciding variant features across multiple SNPlogger generated files.
-    Options:
-        '-w', '--wildtype', 'indicate space sep list of logfiles whose features to mask from mutant logfiles', nargs='*', required=False)
-        '-m', '--mutant', 'indicate space sep list of mutant logfiles'
-        '-o', '--output', 'indicate prefix name of output report(s) (default="SNPtracker")'
-        '-s', '--select', 'selective by polymorphism type. Indicate space sep list of types to only include in analysis (default includes all). Accepted strings are any base change in the form N\>N (eg. "C\>T"), "indel", "lowcov", "noisy", "any" (any N\>N)'
-        '-f', '--filter', 'filter by SNV frequency. Indicate min frequency to include in analysis (default=0.8). Entries with "NaN" included by default'
-        '-v', '--verbose', 'indicate True to also generate detailed reports (incl. polymorphic type and coordinate) for each subset number of mutants in addition to default summary report'
-        '-p', '--proximal', 'indicate window size. Instead of finding features that coincide on a particular contig, SNPtracker will find features that reside close to each other within a user defined window size (min=1000 bases). Suitable for assemblies with large scaffolds'
-        '-n', '--min', 'set min number of mutants to consider. Otherwise all mutant subsets >=2 are analysed'
-        '-t', '--tolerate', 'set max number of mutants to tolerate with polymorphisms in identical positions for a given discovery (default none)'
-    Library dependencies:
-        'argparse', 'sys', 'csv', 'math', 're', 'itertools'
-        
-Example Workflow
+## Example Workflow
+This specific workflow is designed to discover sequences/contigs that contain mutagen induced variation occuring independently across a number of mutants. In mutagenesis experiments for which single gene knockouts can be selected for phenotypically, such a finding is strongly indidcative that the target gene has been isolated given a sufficient number of mutants. It is based on generating a de novo assembly from wild-type NGS reads and then aligning mutant NGS reads independently against the wild-type assembly and recording any mismatches between each mutant and the wild-type. Ideally, the wild-type should be parental to the mutants and all be near-isogenic lines in order to minimise noise due to normal genetic variation. This pipeline is inspired by similar pipelines such as MutantHunter (https://github.com/steuernb/MutantHunter), but with an alternate approach and added flexibility.
 
-    coming soon...
+### Prerequisites
+Python 2.7
+see https://www.python.org/download/releases/2.7/
+BWA or other suitable aligner
+see http://bio-bwa.sourceforge.net/
+Samtools 1.5 or later
+see http://samtools.sourceforge.net/
+de novo assebly software
+can be of your choosing but should be relatively stringent to avoid collapsing highly homologous yet distinct sequences as a single consensus
+The CLC assembly cell (https://www.qiagenbioinformatics.com/products/clc-assembly-cell/) or MaSuRCA assembler (http://www.genome.umd.edu/masurca.html) generate suitable assemblies.
+
+### Preprocessing
+
+## clean raw data
+if data is not already cleaned/trimmed, software such as Trimmomatic can be used (http://www.usadellab.org/cms/?page=trimmomatic)
+for example if your data is paired-end then for each fastq file you would do something like:
+	trimmomatic PE -threads 8 -phred33 readsIn_1.fq.gz readsIn_2.fq.gz readsOut_1.clean.fq.gz readsOut_1.unpaired.fq.gz readsOut_2.clean.fq.gz readsOut_2.unpaired.fq.gz ILLUMINACLIP:adapter_seqs.fasta:2:30:10:8:TRUE LEADING:28 TRAILING:28 MINLEN:20
+
+## de novo assembly of wild-type 
+as stated earlier, use tool of your choice, but ensure a decent N50 as a quality assembly is the crux of the whole procedure. Note that some assemblers prefer the input to be raw, uncleaned data (MaSuRCA).
+
+## mapping to wild-type
+as well as te mutants, the wild-type reads should also be mapped to their assembly to ensure greater accuracy in later steps. Again, choice of alignment software is at your discretion but BWA and samtools offer a straightforward process. Initially index the assembly:
+	bwa index WT_assembly.fasta
+	samtools faidx WT_assembly.fasta
+then run the following steps for each mutant and wild-type:
+	bwa aln assembly.fasta read1.fastq > read1.aln
+	bwa aln assembly.fasta read2.fastq > read2.aln
+	bwa sampe assembly.fasta read1.aln read2.aln read1.fastq read2.fastq > raw.sam
+	samtools view -f2 -Shub -o raw.bam raw.sam
+	samtools sort raw.bam sorted
+	samtools rmdup sorted.bam rmdup.bam
+	samtools index rmdup.bam
+
+## Mutant discovery steps
+Example for wildtype "WT.rmdup.bam" plus mutants "mut1.rmdup.bam", "mut2.rmdup.bam", "mut3.rmdup.bam"...
+
+1) create pileup of WT bam only.
+    samtools mpileup -BQ0 -aa -f WT_assembly.fasta WT.rmdup.bam > WT.pileup
+       
+2) run Noisefinder on WT pileup.
+    python Noisefinder.pyc -i WT.pileup > WT.noise.log
+
+3) run SNPlogger on WT and mutants using WT.noise.log to mask rubbish regions. Run "python SNPlogger.pyc -h" to see additional options as noise.log files generated from mutants can be used as features themselves in later steps.
+
+for WT, SNPlogger can be run on already created pileup:
+    python SNPlogger.pyc -i WT.pileup -b WT.noise.log -o WT.snp.log
+
+for mutants, pileups can be created on the fly and piped directly to SNPlogger.
+
+one by one:
+    samtools mpileup -aa -BQ0 -f WT_assembly.fasta mut1.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o mut1.snp.log
+or in a loop:
+    for i in mut{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log; done
+
+note that SNPlogger will print a summary of SNP statistics to the screen upon completion of each file. To save these stats, use ">" to redirect standard output to a file:
+    for i in m{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log > ${i}.stats.txt; done
+
+4) run SNPtracker on snp.log files, "-w" for WT file(s), "-m" for mutant files. SNPtracker can still work without a WT or with >1 WT. This step is relatively fast and can complete in seconds.
+    python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log
+
+run "python SNPtracker.pyc -h" to see options. E.g. to only report polymorphisms that are C>T, G>A or indels, use "-s" option. To filter polymorphisms based on frequency (default=0.8), use "-f" option. To create detailed reports in addition to the summary report, use "-v T" option. To tolerate N mutants with identical SNPs (e.g. siblings), use "-t N" option:
+    python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log -s C\>T G\>A indel -f 0.9 -v T -t 2
+
+This will create a "SNPtracker.summary" report whose output looks like the following:
+	
+	# wildtypes: WT.snp.log
+	# mutants: mut1.snp.log, mut2.snp.log, mut3.snp.log
+	# selected: C>T, G>A, indel
+	# filtered: 0.9
+	# proximal: OFF
+	# tolerate: 2
+	
+	### polymorphic in 3 mutants ###
+	contig_5565     (mut1.snp.log, mut2.snp.log, mut3.snp.log)
+	
+	### polymorphic in 2 mutants ###
+	contig_8725     (mut1.snp.log, mut3.snp.log)
+	contig_1252     (mut2.snp.log, mut3.snp.log)
+
+If the "-v" option is set to true, the detailed reports generated display the coordinate and type of polymorphisms found in each of the mutants for a given candidate contig/sequence. A report is generated for each N>1. i.e. if there are 5 mutants, SNPtracker will create an N5.report, N4.report, N3.report and N2.report. That is unless a lower limit is specified with the "-n" option. An example of an N2.report may look like the following:
+
+	### poymorphic in 2 mutants ###
+
+	<contig_8725>
+	mut1.snp.log [(1200, G>A, 0.98)]
+	mut3.snp.log [(3210, C>T, 0.91), (4128, indel+5, 1.0)]
+
+	<contig_1252>
+	mut2.snp.log [(852, C>T, 0.95), (3069, G>A. 0.90)]
+	mut3.snp.log [(2567, indel-8, 1.0)]
+
+Alignments for these candidate contigs can also be inspected visually upon loading the bam files into a genome browser such as IGV (http://software.broadinstitute.org/software/igv/).
+SNPtracker also provides a "-p/--proximal" option that tells SNPtracker to find features that reside close to each other within a user defined window (min=1000 bases) rather than only coinciding on a particular contig. This is suitable if working with large scaffolds or assemblies from long read sequencing such as PacBio.
 
 # Miscellaneous
 
-<blast_filterV2.pyc>
-    
-    Description:
-        filter and sort a blast output (outfmt 6 or 7) based on the cutoffs you want for each parameter.
-    Options:
-        '-i', '--input', 'indicate input file (as blast tab outfmt 6 or 7)'
-        '-o', '--output', 'indicate output file'
-        '-p', '--pcntid', 'set min percent id', default=0, 
-        '-a', '--alnlen', 'set min alignment length', default=0
-        '-m', '--msmtch', 'set max mismatches', default=infinite
-        '-g', '--gpopen', 'set max gap opens', default=infinite
-        '-qs', '--qstart', 'set min query seq start', default=0
-        '-qe', '--q_end', 'set max query seq end', default=infinite
-        '-ss', '--sstart', 'set min subject seq start', default=0
-        '-se', '--s_end', 'set max subject seq end', default=infinite
-        '-e', '--evalue', 'set max evalue', default=0.01
-        '-b', '--bscore', 'set min bit score', default=0
-        '-qcov', '--qcov', 'set min qcov', default=0
-        '-qcovh', '--qcovhsp', 'set min qcovhsp', default=0
-        '-sort1', '--sort1', 'choose primary paramter to sort rows best to worst by entering string value: <qname|sname|pcntd|alnlen|msmtch|gpopen|qstart|q_end|sstart|s_end|evalue|bscore|qcov|qcovhsp>'
-        '-sort2', '--sort2', 'choose secondary paramter to sort rows best to worst by entering string value: <qname|sname|pcntd|alnlen|msmtch|gpopen|qstart|q_end|sstart|s_end|evalue|bscore(default)|qcov|qcovhsp>'
-        '-topq', '--gettopq', 'set number of top hits per query to output. Top hits based on preferred sort parameter - must use sort option'
-    Library dependencies:
-        'argparse', 'csv', 'operator'
         
