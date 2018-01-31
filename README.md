@@ -33,7 +33,7 @@ can be of your choosing but should be relatively stringent to avoid collapsing h
 if data is not already cleaned/trimmed, software such as Trimmomatic can be used (http://www.usadellab.org/cms/?page=trimmomatic)
 for example if your data is paired-end then for each fastq file you would do something like:
 
-	trimmomatic PE -threads 8 -phred33 readsIn_1.fq.gz readsIn_2.fq.gz readsOut_1.clean.fq.gz readsOut_1.unpaired.fq.gz readsOut_2.clean.fq.gz readsOut_2.unpaired.fq.gz ILLUMINACLIP:adapter_seqs.fasta:2:30:10:8:TRUE LEADING:28 TRAILING:28 MINLEN:20
+>trimmomatic PE -threads 8 -phred33 readsIn_1.fq.gz readsIn_2.fq.gz readsOut_1.clean.fq.gz readsOut_1.unpaired.fq.gz readsOut_2.clean.fq.gz readsOut_2.unpaired.fq.gz ILLUMINACLIP:adapter_seqs.fasta:2:30:10:8:TRUE LEADING:28 TRAILING:28 MINLEN:20
 
 #### _de novo_ assembly of wild-type 
 as stated earlier, use tool of your choice, but ensure a decent N50 as a quality assembly is the crux of the whole procedure. Note that some assemblers prefer the input to be raw, uncleaned data (MaSuRCA).
@@ -41,8 +41,8 @@ as stated earlier, use tool of your choice, but ensure a decent N50 as a quality
 #### mapping to wild-type
 as well as te mutants, the wild-type reads should also be mapped to their assembly to ensure greater accuracy in later steps. Again, choice of alignment software is at your discretion but BWA and samtools offer a straightforward process. Initially index the assembly:
 
-	bwa index WT_assembly.fasta
-	samtools faidx WT_assembly.fasta
+>	bwa index WT_assembly.fasta
+>	samtools faidx WT_assembly.fasta
 
 then run the following steps for each mutant and wild-type:
 
@@ -96,31 +96,31 @@ run "python SNPtracker.pyc -h" to see options. E.g. to only report polymorphisms
 
 This will create a "SNPtracker.summary" report whose output looks like the following:
 	
->	# wildtypes: WT.snp.log
->	# mutants: mut1.snp.log, mut2.snp.log, mut3.snp.log
->	# selected: C>T, G>A, indel
->	# filtered: 0.9
->	# proximal: OFF
->	# tolerate: 2
->	
->	### polymorphic in 3 mutants ###
->	contig_5565     (mut1.snp.log, mut2.snp.log, mut3.snp.log)
->	
->	### polymorphic in 2 mutants ###
->	contig_8725     (mut1.snp.log, mut3.snp.log)
->	contig_1252     (mut2.snp.log, mut3.snp.log)
+	# wildtypes: WT.snp.log
+	# mutants: mut1.snp.log, mut2.snp.log, mut3.snp.log
+	# selected: C>T, G>A, indel
+	# filtered: 0.9
+	# proximal: OFF
+	# tolerate: 2
+	
+	### polymorphic in 3 mutants ###
+	contig_5565     (mut1.snp.log, mut2.snp.log, mut3.snp.log)
+	
+	### polymorphic in 2 mutants ###
+	contig_8725     (mut1.snp.log, mut3.snp.log)
+	contig_1252     (mut2.snp.log, mut3.snp.log)
 
 If the "-v" option is set to true, the detailed reports generated display the coordinate and type of polymorphisms found in each of the mutants for a given candidate contig/sequence. A report is generated for each N>1. i.e. if there are 5 mutants, SNPtracker will create an N5.report, N4.report, N3.report and N2.report. That is unless a lower limit is specified with the "-n" option. An example of an N2.report may look like the following:
 
->	### poymorphic in 2 mutants ###
->
->	<contig_8725>
->	mut1.snp.log [(1200, G>A, 0.98)]
->	mut3.snp.log [(3210, C>T, 0.91), (4128, indel+5, 1.0)]
->
->	<contig_1252>
->	mut2.snp.log [(852, C>T, 0.95), (3069, G>A. 0.90)]
->	mut3.snp.log [(2567, indel-8, 1.0)]
+	### poymorphic in 2 mutants ###
+
+	<contig_8725>
+	mut1.snp.log [(1200, G>A, 0.98)]
+	mut3.snp.log [(3210, C>T, 0.91), (4128, indel+5, 1.0)]
+
+	<contig_1252>
+	mut2.snp.log [(852, C>T, 0.95), (3069, G>A. 0.90)]
+	mut3.snp.log [(2567, indel-8, 1.0)]
 
 Alignments for these candidate contigs can also be inspected visually upon loading the bam files into a genome browser such as IGV (http://software.broadinstitute.org/software/igv/).
 
