@@ -17,7 +17,7 @@ Will parse an mpileup file and log all SNPs and indels that satisfy parameters. 
 Finds sequence IDs/regions with coinciding polymorphic features across multiple SNPlogger generated files
 
 ## Example Workflow
-This specific workflow is designed to discover sequences/contigs that contain mutagen induced variation occuring independently across a number of mutants. In mutagenesis experiments for which single gene knockouts can be selected for phenotypically, such a finding is strongly indidcative that the target gene has been isolated given a sufficient number of mutants. It is based on generating a de novo assembly from wild-type NGS reads and then aligning mutant NGS reads independently against the wild-type assembly and recording any mismatches between each mutant and the wild-type. Ideally, the wild-type should be parental to the mutants and all be near-isogenic lines in order to minimise noise due to normal genetic variation. This pipeline is inspired by similar pipelines such as MutantHunter (https://github.com/steuernb/MutantHunter), but with an alternate approach and added flexibility.
+This specific workflow is designed to discover sequences/contigs that contain mutagen induced variation occuring independently across a number of mutants. In mutagenesis experiments for which single gene knockouts can be selected for phenotypically, such a finding is strongly indidcative that the target gene has been isolated given a sufficient number of mutants. It is based on generating a de novo assembly from wild-type NGS reads and then aligning mutant NGS reads independently against the wild-type assembly and recording any mismatches between each mutant and the wild-type. Ideally, the wild-type should be parental to the mutants and all be near-isogenic lines in order to minimise noise due to normal genetic variation. This pipeline is inspired by similar pipelines such as MutantHunter (https://github.com/steuernb/MutantHunter), but takes an alternate approach with added flexibility.
 
 ### Prerequisites
 **Python 2.7**
@@ -88,26 +88,26 @@ for WT, SNPlogger can be run on already created pileup:
 for mutants, pileups can be created on the fly and piped directly to SNPlogger.
 
 one by one:
-
-`samtools mpileup -aa -BQ0 -f WT_assembly.fasta mut1.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o mut1.snp.log`
-    
+```
+samtools mpileup -aa -BQ0 -f WT_assembly.fasta mut1.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o mut1.snp.log
+```    
 or in a loop:
-
-`for i in mut{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log; done`
-
+```
+for i in mut{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log; done
+```
 note that SNPlogger will print a summary of SNP statistics to the screen upon completion of each file. To save these stats, use ">" to redirect standard output to a file:
-
-`for i in m{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log > ${i}.stats.txt; done`
-
+```
+for i in m{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log > ${i}.stats.txt; done
+```
 **4) run SNPtracker on snp.log files.**
 use "-w" for WT file(s), "-m" for mutant files. SNPtracker can still work without a WT or with >1 WT. This step is relatively fast and can complete in seconds:
 
 `python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log`
 
 run "python SNPtracker.pyc -h" to see options. E.g. to only report polymorphisms that are C>T, G>A or indels, use "-s" option. To filter polymorphisms based on frequency (default=0.8), use "-f" option. To create detailed reports in addition to the summary report, use "-v T" option. To tolerate N mutants with identical SNPs (e.g. siblings), use "-t N" option:
-
-`python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log -s C\>T G\>A indel -f 0.9 -v T -t 2`
-
+```
+python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log -s C\>T G\>A indel -f 0.9 -v T -t 2`
+```
 This will create a "SNPtracker.summary" report whose output looks like the following:
 	
 	# wildtypes: WT.snp.log
@@ -141,5 +141,16 @@ Alignments for these candidate contigs can also be inspected visually upon loadi
 SNPtracker also provides a "-p/--proximal" option that tells SNPtracker to find features that reside close to each other within a user defined window (min=1000 bases) rather than only coinciding on a particular contig. This is suitable if working with large scaffolds or assemblies from long read sequencing such as PacBio.
 
 # Miscellaneous
+## Tool descriptions
+**blast_filterV2.pyc**
 
-        
+filter and sort a blast output (outfmt 6 or 7) based on the cutoffs you want
+for each parameter
+
+**contig_counts.py**
+
+get contig counts and stats from a multi-fasta file
+
+**NLRparser_txt2bed.py**
+
+convert NLR-parser (https://github.com/steuernb/NLR-Parser) txt output to bed
