@@ -67,7 +67,7 @@ samtools rmdup sorted.bam rmdup.bam
 samtools index rmdup.bam
 ```
 
-#### Mutant discovery steps
+### Mutant discovery steps
 Using example files for wildtype "WT.rmdup.bam" plus mutants "mut1.rmdup.bam", "mut2.rmdup.bam", "mut3.rmdup.bam"...
 
 **1) create pileup of WT bam only.**
