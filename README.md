@@ -4,7 +4,6 @@ tools and pipelines for deep sequencing analysis
 This pipeline was optimised for mutagen induced SNP discovery in sequence data from exome capture experiments. However, flexible options allow wide application for variant analysis in any deep sequencing data.
 
 ## Tool descriptions
-
 **Noisefinder.pyc**
 
 Regions rich in mismatches/poor coverage after read alignment can often signify misalignment or mixed alignment due to allelism, polyploidy, or presence/absemce variation. Given a pileup file, noisefinder reports regions containing a density of SNVs above a user defined threshold over a given min length and min read depth (prints to STDOUT).
@@ -22,12 +21,19 @@ This specific workflow is designed to discover sequences/contigs that contain mu
 
 ### Prerequisites
 **Python 2.7**
+
 see https://www.python.org/download/releases/2.7/
+
 **BWA or other suitable aligner**
+
 see http://bio-bwa.sourceforge.net/
+
 **Samtools 1.5 or later**
+
 see http://samtools.sourceforge.net/
+
 **_De novo_ assembly software**
+
 can be of your choosing but should be relatively stringent to avoid collapsing highly homologous yet distinct sequences as a single consensus. The CLC assembly cell (https://www.qiagenbioinformatics.com/products/clc-assembly-cell/) or MaSuRCA assembler (http://www.genome.umd.edu/masurca.html) generate suitable assemblies.
 
 ### Preprocessing
@@ -35,9 +41,9 @@ can be of your choosing but should be relatively stringent to avoid collapsing h
 #### clean raw data
 if data is not already cleaned/trimmed, software such as Trimmomatic can be used (http://www.usadellab.org/cms/?page=trimmomatic)
 for example if your data is paired-end then for each fastq file you would do something like:
-
-`trimmomatic PE -threads 8 -phred33 readsIn_1.fq.gz readsIn_2.fq.gz readsOut_1.clean.fq.gz readsOut_1.unpaired.fq.gz readsOut_2.clean.fq.gz readsOut_2.unpaired.fq.gz ILLUMINACLIP:adapter_seqs.fasta:2:30:10:8:TRUE LEADING:28 TRAILING:28 MINLEN:20`
-
+```
+trimmomatic PE -threads 8 -phred33 readsIn_1.fq.gz readsIn_2.fq.gz readsOut_1.clean.fq.gz readsOut_1.unpaired.fq.gz readsOut_2.clean.fq.gz readsOut_2.unpaired.fq.gz ILLUMINACLIP:adapter_seqs.fasta:2:30:10:8:TRUE LEADING:28 TRAILING:28 MINLEN:20
+```
 #### _de novo_ assembly of wild-type 
 as stated earlier, use tool of your choice, but ensure a decent N50 as a quality assembly is the crux of the whole procedure. Note that some assemblers prefer the input to be raw, uncleaned data (MaSuRCA).
 
