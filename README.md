@@ -79,6 +79,7 @@ Using example files for wildtype "WT.rmdup.bam" plus mutants "mut1.rmdup.bam", "
 `python Noisefinder.pyc -i WT.pileup > WT.noise.log`
 
 **3) run SNPlogger on WT and mutants using WT.noise.log to mask rubbish regions.**
+
 Run "python SNPlogger.pyc -h" to see additional options as noise.log files generated from mutants can be used as features themselves in later steps.
 
 for WT, SNPlogger can be run on already created pileup:
@@ -100,13 +101,14 @@ note that SNPlogger will print a summary of SNP statistics to the screen upon co
 for i in m{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log > ${i}.stats.txt; done
 ```
 **4) run SNPtracker on snp.log files.**
+
 use "-w" for WT file(s), "-m" for mutant files. SNPtracker can still work without a WT or with >1 WT. This step is relatively fast and can complete in seconds:
 
 `python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log`
 
 run "python SNPtracker.pyc -h" to see options. E.g. to only report polymorphisms that are C>T, G>A or indels, use "-s" option. To filter polymorphisms based on frequency (default=0.8), use "-f" option. To create detailed reports in addition to the summary report, use "-v T" option. To tolerate N mutants with identical SNPs (e.g. siblings), use "-t N" option:
 ```
-python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log -s C\>T G\>A indel -f 0.9 -v T -t 2`
+python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log -s C\>T G\>A indel -f 0.9 -v T -t 2
 ```
 This will create a "SNPtracker.summary" report whose output looks like the following:
 	
