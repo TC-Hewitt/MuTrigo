@@ -6,12 +6,15 @@ This pipeline was optimised for mutagen induced SNP discovery in sequence data f
 ## Tool descriptions
 
 **Noisefinder.pyc**
+
 Regions rich in mismatches/poor coverage after read alignment can often signify misalignment or mixed alignment due to allelism, polyploidy, or presence/absemce variation. Given a pileup file, noisefinder reports regions containing a density of SNVs above a user defined threshold over a given min length and min read depth (prints to STDOUT).
     
 **SNPlogger.pyc**
+
 Will parse an mpileup file and log all SNPs and indels that satisfy parameters. Final tally printed to STDOUT. Outfile is formatted as tab sep fields: <seqid> <position(1based)> <polymorphic-type> <frequency(float)>. Compatible with STDIN.
 
 **SNPtracker.pyc**
+
 Finds sequence IDs/regions with coinciding polymorphic features across multiple SNPlogger generated files
 
 ## Example Workflow
@@ -33,7 +36,7 @@ can be of your choosing but should be relatively stringent to avoid collapsing h
 if data is not already cleaned/trimmed, software such as Trimmomatic can be used (http://www.usadellab.org/cms/?page=trimmomatic)
 for example if your data is paired-end then for each fastq file you would do something like:
 
->trimmomatic PE -threads 8 -phred33 readsIn_1.fq.gz readsIn_2.fq.gz readsOut_1.clean.fq.gz readsOut_1.unpaired.fq.gz readsOut_2.clean.fq.gz readsOut_2.unpaired.fq.gz ILLUMINACLIP:adapter_seqs.fasta:2:30:10:8:TRUE LEADING:28 TRAILING:28 MINLEN:20
+`trimmomatic PE -threads 8 -phred33 readsIn_1.fq.gz readsIn_2.fq.gz readsOut_1.clean.fq.gz readsOut_1.unpaired.fq.gz readsOut_2.clean.fq.gz readsOut_2.unpaired.fq.gz ILLUMINACLIP:adapter_seqs.fasta:2:30:10:8:TRUE LEADING:28 TRAILING:28 MINLEN:20`
 
 #### _de novo_ assembly of wild-type 
 as stated earlier, use tool of your choice, but ensure a decent N50 as a quality assembly is the crux of the whole procedure. Note that some assemblers prefer the input to be raw, uncleaned data (MaSuRCA).
@@ -41,58 +44,63 @@ as stated earlier, use tool of your choice, but ensure a decent N50 as a quality
 #### mapping to wild-type
 as well as te mutants, the wild-type reads should also be mapped to their assembly to ensure greater accuracy in later steps. Again, choice of alignment software is at your discretion but BWA and samtools offer a straightforward process. Initially index the assembly:
 
->	bwa index WT_assembly.fasta
->	samtools faidx WT_assembly.fasta
+```
+bwa index WT_assembly.fasta
+samtools faidx WT_assembly.fasta
+```
 
 then run the following steps for each mutant and wild-type:
 
-	bwa aln assembly.fasta read1.fastq > read1.aln
-	bwa aln assembly.fasta read2.fastq > read2.aln
-	bwa sampe assembly.fasta read1.aln read2.aln read1.fastq read2.fastq > raw.sam
-	samtools view -f2 -Shub -o raw.bam raw.sam
-	samtools sort raw.bam sorted
-	samtools rmdup sorted.bam rmdup.bam
-	samtools index rmdup.bam
+```
+bwa aln assembly.fasta read1.fastq > read1.aln
+bwa aln assembly.fasta read2.fastq > read2.aln
+bwa sampe assembly.fasta read1.aln read2.aln read1.fastq read2.fastq > raw.sam
+samtools view -f2 -Shub -o raw.bam raw.sam
+samtools sort raw.bam sorted
+samtools rmdup sorted.bam rmdup.bam
+samtools index rmdup.bam
+```
 
 #### Mutant discovery steps
 Using example files for wildtype "WT.rmdup.bam" plus mutants "mut1.rmdup.bam", "mut2.rmdup.bam", "mut3.rmdup.bam"...
 
 **1) create pileup of WT bam only.**
 
-    samtools mpileup -BQ0 -aa -f WT_assembly.fasta WT.rmdup.bam > WT.pileup
+`samtools mpileup -BQ0 -aa -f WT_assembly.fasta WT.rmdup.bam > WT.pileup`
        
 **2) run Noisefinder on WT pileup.**
 
-    python Noisefinder.pyc -i WT.pileup > WT.noise.log
+`python Noisefinder.pyc -i WT.pileup > WT.noise.log`
 
 **3) run SNPlogger on WT and mutants using WT.noise.log to mask rubbish regions.**
 Run "python SNPlogger.pyc -h" to see additional options as noise.log files generated from mutants can be used as features themselves in later steps.
 
 for WT, SNPlogger can be run on already created pileup:
 
-    python SNPlogger.pyc -i WT.pileup -b WT.noise.log -o WT.snp.log
+`python SNPlogger.pyc -i WT.pileup -b WT.noise.log -o WT.snp.log`
 
 for mutants, pileups can be created on the fly and piped directly to SNPlogger.
 
 one by one:
 
-    samtools mpileup -aa -BQ0 -f WT_assembly.fasta mut1.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o mut1.snp.log
+`samtools mpileup -aa -BQ0 -f WT_assembly.fasta mut1.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o mut1.snp.log`
+    
 or in a loop:
 
-    for i in mut{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log; done
+`for i in mut{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log; done`
 
 note that SNPlogger will print a summary of SNP statistics to the screen upon completion of each file. To save these stats, use ">" to redirect standard output to a file:
 
-    for i in m{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log > ${i}.stats.txt; done
+`for i in m{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log > ${i}.stats.txt; done`
 
 **4) run SNPtracker on snp.log files.**
-used "-w" for WT file(s), "-m" for mutant files. SNPtracker can still work without a WT or with >1 WT. This step is relatively fast and can complete in seconds:
+use "-w" for WT file(s), "-m" for mutant files. SNPtracker can still work without a WT or with >1 WT. This step is relatively fast and can complete in seconds:
 
-    python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log
+`python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log`
 
 run "python SNPtracker.pyc -h" to see options. E.g. to only report polymorphisms that are C>T, G>A or indels, use "-s" option. To filter polymorphisms based on frequency (default=0.8), use "-f" option. To create detailed reports in addition to the summary report, use "-v T" option. To tolerate N mutants with identical SNPs (e.g. siblings), use "-t N" option:
 
-    python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log -s C\>T G\>A indel -f 0.9 -v T -t 2
+`python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log -s C\>T G\>A indel -f 0.9 -v T -t 2`
 
 This will create a "SNPtracker.summary" report whose output looks like the following:
 	
