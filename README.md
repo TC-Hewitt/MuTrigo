@@ -6,18 +6,18 @@ This pipeline was optimised for mutagen induced SNP discovery in sequence data f
 ## Tool descriptions
 **Noisefinder.pyc**
 
-Regions rich in mismatches/poor coverage after read alignment can often signify misalignment or mixed alignment due to allelism, polyploidy, or presence/absemce variation. Given a pileup file, noisefinder reports regions containing a density of SNVs above a user defined threshold over a given min length and min read depth (prints to STDOUT).
+Regions rich in mismatches/poor coverage after read alignment can often signify misalignment or mixed alignment due to allelism, polyploidy, or presence/absence variation. Given a pileup file, noisefinder reports regions containing a density of SNVs above a user defined threshold over a given min length and min read depth (prints to STDOUT).
     
 **SNPlogger.pyc**
 
-Will parse an mpileup file and log all SNPs and indels that satisfy parameters. Final tally printed to STDOUT. Outfile is formatted as tab sep fields: <seqid> <position(1based)> <polymorphic-type> <frequency(float)>. Compatible with STDIN.
+Will parse an mpileup file and log all SNPs and indels that satisfy parameters. Final tally printed to STDOUT. Outfile is formatted as tab sep fields: seqid, position(1based), polymorphic-type, frequency(float). Compatible with STDIN.
 
 **SNPtracker.pyc**
 
 Finds sequence IDs/regions with coinciding polymorphic features across multiple SNPlogger generated files
 
 ## Example Workflow
-This specific workflow is designed to discover sequences/contigs that contain mutagen induced variation occuring independently across a number of mutants. In mutagenesis experiments for which single gene knockouts can be selected for phenotypically, such a finding is strongly indidcative that the target gene has been isolated given a sufficient number of mutants. It is based on generating a de novo assembly from wild-type NGS reads and then aligning mutant NGS reads independently against the wild-type assembly and recording any mismatches between each mutant and the wild-type. Ideally, the wild-type should be parental to the mutants and all be near-isogenic lines in order to minimise noise due to normal genetic variation. This pipeline is inspired by similar pipelines such as MutantHunter (https://github.com/steuernb/MutantHunter), but takes an alternate approach with added flexibility.
+This specific workflow is designed to discover sequences/contigs that contain mutagen induced variation occuring independently across a number of mutants. In mutagenesis experiments for which single gene knockouts can be selected for phenotypically, such a finding is strongly indicative that the target gene has been isolated given a sufficient number of mutants. It is based on generating a _de novo_ assembly from wild-type NGS reads followed by aligning mutant NGS reads independently against the wild-type assembly and recording any mismatches between each mutant and the wild-type. Ideally, the wild-type should be parental to the mutants and all be near-isogenic lines in order to minimise noise due to normal genetic variation. This pipeline is inspired by similar pipelines such as MutantHunter (https://github.com/steuernb/MutantHunter), but takes an alternate approach with added flexibility.
 
 ### Prerequisites
 **Python 2.7**
@@ -48,7 +48,7 @@ trimmomatic PE -threads 8 -phred33 readsIn_1.fq.gz readsIn_2.fq.gz readsOut_1.cl
 as stated earlier, use tool of your choice, but ensure a decent N50 as a quality assembly is the crux of the whole procedure. Note that some assemblers prefer the input to be raw, uncleaned data (MaSuRCA).
 
 #### mapping to wild-type
-as well as te mutants, the wild-type reads should also be mapped to their assembly to ensure greater accuracy in later steps. Again, choice of alignment software is at your discretion but BWA and samtools offer a straightforward process. Initially index the assembly:
+as well as the mutants, the wild-type reads should also be mapped to their assembly to ensure greater accuracy in later steps. Again, choice of alignment software is at your discretion but BWA and samtools offer a straightforward process. Initially index the assembly:
 
 ```
 bwa index WT_assembly.fasta
