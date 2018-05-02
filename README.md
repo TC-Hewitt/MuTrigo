@@ -1,5 +1,3 @@
-Mutant gene candidate discovery
-
 # MuTrigo
 This pipeline was optimised for mutagen induced SNP/indel discovery in sequence data from exome capture experiments. However, flexible options allow wide application for variant analysis in any deep sequencing data.
 
