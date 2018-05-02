@@ -141,18 +141,3 @@ If the "-v" option is set to true, the detailed reports generated display the co
 Alignments for these candidate contigs can also be inspected visually upon loading the bam files into a genome browser such as IGV (http://software.broadinstitute.org/software/igv/).
 
 SNPtracker also provides a "-p/--proximal" option that tells SNPtracker to find features that reside close to each other within a user defined window (min=1000 bases) rather than only coinciding on a particular contig. This is suitable if working with large scaffolds or assemblies from long read sequencing such as PacBio.
-
-# Miscellaneous
-## Tool descriptions
-**blast_filterV2.pyc**
-
-filter and sort a blast output (outfmt 6 or 7) based on the cutoffs you want
-for each parameter
-
-**contig_counts.py**
-
-get contig counts and stats from a multi-fasta file
-
-**NLRparser_txt2bed.py**
-
-convert NLR-parser (https://github.com/steuernb/NLR-Parser) txt output to bed
