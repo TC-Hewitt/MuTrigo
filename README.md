@@ -1,7 +1,7 @@
-tools and pipelines for deep sequencing analysis
+Mutant gene candidate discovery
 
-# Mutant Discovery
-This pipeline was optimised for mutagen induced SNP discovery in sequence data from exome capture experiments. However, flexible options allow wide application for variant analysis in any deep sequencing data.
+# MuTrigo
+This pipeline was optimised for mutagen induced SNP/indel discovery in sequence data from exome capture experiments. However, flexible options allow wide application for variant analysis in any deep sequencing data.
 
 ## Tool descriptions
 **Noisefinder.pyc**
