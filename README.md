@@ -138,4 +138,4 @@ If the "-v" option is set to true, the detailed reports generated display the co
 
 Alignments for these candidate contigs can also be inspected visually upon loading the bam files into a genome browser such as IGV (http://software.broadinstitute.org/software/igv/).
 
-SNPtracker also provides a "-p/--proximal" option that tells SNPtracker to find features that reside close to each other within a user defined window (min=1000 bases) rather than only coinciding on a particular contig. This is suitable if working with large scaffolds or assemblies from long read sequencing such as PacBio.
+SNPtracker also provides a "-p/--proximal" option that tells SNPtracker to find features that reside close to each other within a user defined window (min=1000 bases) rather than only coinciding on a particular contig. This is suitable if working with large scaffolds or pseudomolecules that may contain multiple genes.
