@@ -59,8 +59,8 @@ then run the following steps for each mutant and wild-type:
 bwa aln assembly.fasta read1.fastq > read1.aln
 bwa aln assembly.fasta read2.fastq > read2.aln
 bwa sampe assembly.fasta read1.aln read2.aln read1.fastq read2.fastq > raw.sam
-samtools view -f2 -Shub -o raw.bam raw.sam
-samtools sort raw.bam sorted
+samtools view -hub -o raw.bam raw.sam (or replace raw.sam with '-' if piping from STDIN)
+samtools sort -o sorted.bam -O BAM raw.bam
 samtools rmdup sorted.bam rmdup.bam
 samtools index rmdup.bam
 ```
