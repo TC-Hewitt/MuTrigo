@@ -70,7 +70,7 @@ Using example files for wildtype "WT.rmdup.bam" plus mutants "mut1.rmdup.bam", "
 
 **1) create pileup of WT bam only.**
 
-`samtools mpileup -BQ0 -aa -f WT_assembly.fasta WT.rmdup.bam > WT.pileup`
+`samtools mpileup -BQ0 -a -f WT_assembly.fasta WT.rmdup.bam > WT.pileup`
        
 **2) run Noisefinder on WT pileup.**
 
@@ -88,11 +88,11 @@ for mutants, pileups can be created on the fly and piped directly to SNPlogger.
 
 one by one:
 ```
-samtools mpileup -aa -BQ0 -f WT_assembly.fasta mut1.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o mut1.snp.log
+samtools mpileup -a -BQ0 -f WT_assembly.fasta mut1.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o mut1.snp.log
 ```    
 or in a loop:
 ```
-for i in mut{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log; done
+for i in mut{1..3}; do samtools mpileup -a -BQ0 -f WT_assembly.fasta ${i}.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log; done
 ```
 note that SNPlogger will print a summary of SNP statistics to the screen upon completion of each file. To save these stats, use ">" to redirect standard output to a file:
 ```
@@ -138,4 +138,8 @@ If the "-v" option is set to true, the detailed reports generated display the co
 
 Alignments for these candidate contigs can also be inspected visually upon loading the bam files into a genome browser such as IGV (http://software.broadinstitute.org/software/igv/).
 
-SNPtracker also provides a "-p/--proximal" option that tells SNPtracker to find features that reside close to each other within a user defined window (min=1000 bases) rather than only coinciding on a particular contig. This is suitable if working with large scaffolds or pseudomolecules that may contain multiple genes.
+SNPtracker also provides a "-p/--proximal" option that tells SNPtracker to find features that reside close to each other within a user defined window (min=1000 bases) rather than only coinciding on a particular contig. This is suitable if working with large scaffolds or pseudomolecules that may contain multiple genes. For example, to report features only within max 10kb of each other:
+```
+python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log -p 10000
+```
+
