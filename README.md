@@ -96,7 +96,7 @@ for i in mut{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.rmdup
 ```
 note that SNPlogger will print a summary of SNP statistics to the screen upon completion of each file. To save these stats, use ">" to redirect standard output to a file:
 ```
-for i in m{1..3}; do samtools mpileup -aa -BQ0 -f WT_assembly.fasta ${i}.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log > ${i}.stats.txt; done
+for i in m{1..3}; do samtools mpileup -a -BQ0 -f WT_assembly.fasta ${i}.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log > ${i}.stats.txt; done
 ```
 **4) run SNPtracker on snp.log files.**
 
