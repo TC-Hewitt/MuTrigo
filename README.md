@@ -18,9 +18,9 @@ Finds sequence IDs/regions with coinciding polymorphic features across multiple 
 This specific workflow is designed to discover sequences/contigs that contain mutagen induced variation occuring independently across a number of mutants. In mutagenesis experiments for which single gene knockouts can be selected for phenotypically, such a finding is strongly indicative that the target gene has been isolated given a sufficient number of mutants. It is based on generating a _de novo_ assembly from wild-type NGS reads followed by aligning mutant NGS reads independently against the wild-type assembly and recording any mismatches between each mutant and the wild-type. Ideally, the wild-type should be parental to the mutants and all be near-isogenic lines in order to minimise noise due to normal genetic variation. This pipeline is inspired by similar pipelines such as MutantHunter (https://github.com/steuernb/MutantHunter), but takes an alternate approach with added flexibility.
 
 ### Prerequisites
-**Python 2.7**
+**Python 3.x.x**
 
-see https://www.python.org/download/releases/2.7/
+see https://www.python.org/downloads/
 
 **BWA or other suitable aligner**
 
