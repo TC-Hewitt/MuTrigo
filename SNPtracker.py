@@ -19,10 +19,10 @@ def main():
     parser = argparse.ArgumentParser(description='finds sequence IDs/regions with coinciding polymorphic features across multiple SNPlogger generated files')
     parser.add_argument('-w', '--wildtype', help='indicate space sep list of logfiles whose features to mask from mutant logfiles', nargs='*', required=False)
     parser.add_argument('-m', '--mutant', help='indicate space sep list of mutant logfiles', nargs='*', required=True)
-    parser.add_argument('-o', '--output', help='indicate prefix name of output report(s)', required=False, default='SNPtracker')
+    parser.add_argument('-o', '--output', help='indicate prefix only of output html(s)', required=False, default='SNPtracker')
     parser.add_argument('-s', '--select', help='selective by polymorphism type. Indicate space sep list of types to only include in analysis (default includes all). Accepted strings are any base change in the form N\>N (eg. "C\>T"), "indel", "lowcov", "noisy", "any" (any N\>N)', nargs='*', type=str, required=False)
     parser.add_argument('-f', '--filter', help='filter by SNV frequency. Indicate min frequency to include in analysis (default=0.8). Entries with "NaN" included by default', type=float, required=False, default=0.8)
-    parser.add_argument('-v', '--verbose', help='indicate True to also generate detailed reports (incl. polymorphic type and coordinate) for each subset number of mutants in addition to default summary report', type=str, required=False)
+    parser.add_argument('-v', '--verbose', help='indicate True to also generate detailed reports (incl. polymorphic type and coordinate) for each subset number of mutants in addition to default summary html', type=str, required=False)
     parser.add_argument('-p', '--proximal', help='indicate window size. Instead of finding features that coincide on a particular contig, SNPtracker will find features that reside close to each other within a user defined window size (min=1000 bases). Suitable for large scaffolds or pseudomolecules', type=int, required=False)
     parser.add_argument('-n', '--min', help='set min number of mutants to consider. Otherwise all mutant subsets >=2 are analysed', type=int, required=False, default=2)
     parser.add_argument('-t', '--tolerate', help='set max number of mutants to tolerate with polymorphisms in identical positions for a given discovery (default none)', type=int, required=False, default=1)
@@ -150,32 +150,33 @@ def main():
     del(mMask)
     del(mRedD)
     
-    nameOut = str(args.output) + '.summary'
+    nameOut = str(args.output) + '_summary.html'
     summaryOut = open(nameOut, 'w+')
+    summaryOut.write('<!DOCTYPE html>\n<html>\n<h1>summary</h1>\n<h3>parameters</h3>\n')
     if args.wildtype:
-        summaryOut.write('# wildtypes: ' + ', '.join(args.wildtype))
+        summaryOut.write('<p>\nwildtypes: ' + ', '.join(args.wildtype))
     else:
-        summaryOut.write('# wildtypes: NA')
-    summaryOut.write('\n# mutants: ' + ', '.join(args.mutant))
+        summaryOut.write('<p>\nwildtypes: NA')
+    summaryOut.write('<br>\nmutants: ' + ', '.join(args.mutant))
     if args.select:
         if '\\w>\\w' in args.select:
             args.select.remove('\\w>\\w')
             args.select.append('any')
-        summaryOut.write('\n# selected: ' + ', '.join(args.select))
+        summaryOut.write('<br>\nselected: ' + ', '.join(args.select))
     else:
-        summaryOut.write('\n# selected: NA')
+        summaryOut.write('<br>\nselected: NA')
     if args.filter:
-        summaryOut.write('\n# filtered: ' + str(args.filter))
+        summaryOut.write('<br>\nfiltered: ' + str(args.filter))
     else:
-        summaryOut.write('\n# filtered: NA')
+        summaryOut.write('<br>\nfiltered: NA')
     if args.proximal:
-        summaryOut.write('\n# proximal: ON, window: ' + str(args.proximal))
+        summaryOut.write('<br>\nproximal: ON, window: ' + str(args.proximal))
     else:
-        summaryOut.write('\n# proximal: OFF')
+        summaryOut.write('<br>\nproximal: OFF')
     if args.tolerate != 1:
-        summaryOut.write('\n# tolerate: ' + str(args.tolerate) + '\n')
+        summaryOut.write('<br>\ntolerate: ' + str(args.tolerate) + '\n</p>\n')
     else:
-        summaryOut.write('\n# tolerate: none\n')
+        summaryOut.write('<br>\ntolerate: none\n</p>\n')
 
     del(mNums[:])
     mSubD.clear()
@@ -190,11 +191,11 @@ def main():
     for n in mNums: # iterate over n mutants
         nHits = 0
         nInt = int(n.strip('N'))
-        summaryOut.write('\n### polymorphic in ' + str(nInt) + ' mutants ###\n')
+        summaryOut.write('\n<h3>polymorphic in ' + str(nInt) + ' mutants</h3>\n<p>\n')
         if verbose == True: # open report file to write to if verbose true
-            vnameOut = str(args.output) + '.' + n + '.report'
+            vnameOut = str(args.output) + '_' + n + '_report.html'
             verboseOut = open(vnameOut, 'w+')
-            verboseOut.write('### polymorphic in ' + str(nInt) + ' mutants ###\n')
+            verboseOut.write('<!DOCTYPE html>\n<html>\n<body>\n<h1>polymorphic in ' + str(nInt) + ' mutants</h1>\n')
         for s in mSubD[n]: # iterate over combinations of n mutants
             sTemp = []
             mNames = [mVarD[var] for var in s]
@@ -219,12 +220,13 @@ def main():
                     lowLim = min(allVals)
                     if (maxVal - lowLim) <= args.proximal: # write out all mutant features if min to max range is lower than given proximal range
                         nHits += 1
-                        summaryOut.write(seq + ':' + str(lowLim) + '-' + str(maxVal) + '\t(' + ', '.join(mNames) + ')\n')
+                        summaryOut.write(seq + ':' + str(lowLim) + '-' + str(maxVal) + ' <----- (' + ', '.join(mNames) + ')<br>\n')
                         if verbose == True:
-                            verboseOut.write('\n<' + seq + ':' + str(lowLim) + '-' + str(maxVal) + '>\n')
+                            verboseOut.write('<h3>' + seq + ':' + str(lowLim) + '-' + str(maxVal) + '</h3>\n<p>\n')
                             for var in s:
                                 if seq in mRawD[var]:
-                                    verboseOut.write(mVarD[var] + ' ' + str(mRawD[var][seq]).replace('\'','') + '\n')
+                                    verboseOut.write(mVarD[var] + ' ' + str(mRawD[var][seq]).replace('\'','') + '<br>\n')
+                            verboseOut.write('</p>\n')
                         continue
                     uppLim = lowLim + args.proximal
                     zones = set([])
@@ -249,31 +251,35 @@ def main():
                             record = seq + ':' + str(zone[0]) + '-' + str(zone[1])
                             seqHits.append(record) # in form eg. "contig_888:1500-3500, contig_888:7000-9000, contig_901:1-2000 (mut1.log, mut3.log, mut5.log)"
                             if verbose == True:
-                                verboseOut.write('\n<' + record + '>\n')
+                                verboseOut.write('<h3>' + record + '</h3>\n<p>\n')
                                 for var in s:
                                     try:
                                         for feature in mRawD[var][seq]:
                                             if zone[0] <= int(feature[0]) <= zone[1]:
-                                                verboseOut.write(mVarD[var] + ' [' + str(feature).replace('\'','') + ']\n')
+                                                verboseOut.write(mVarD[var] + ' [' + str(feature).replace('\'','') + ']<br>\n')
                                     except BaseException as err:
                                         print(err.message)
                                         continue
-                        summaryOut.write(', '.join(seqHits) + '\t(' + ', '.join(mNames) + ')\n')
-                        
+                                verboseOut.write('</p>\n')
+                        summaryOut.write(', '.join(seqHits) + ' <----- (' + ', '.join(mNames) + ')<br>\n')                
             elif len(sInter) != 0:
                 nHits += len(sInter)
-                summaryOut.write(', '.join(sInter) + '\t(' + ', '.join(mNames) + ')\n')
+                summaryOut.write(', '.join(sInter) + ' <----- (' + ', '.join(mNames) + ')<br>\n')
                 if verbose == True: # write to corresponding verbose file
                     for seq in sInter:
-                        verboseOut.write('\n<' + seq + '>\n')
+                        verboseOut.write('<h3>' + seq + '</h3>\n<p>\n')
                         for var in s:
                             if seq in mRawD[var]:
-                                verboseOut.write(mVarD[var] + ' ' + str(mRawD[var][seq]).replace('\'','') + '\n')
+                                verboseOut.write(mVarD[var] + ' ' + str(mRawD[var][seq]).replace('\'','') + '<br>\n')
+                        verboseOut.write('</p>\n')
             else:
                 continue
+        summaryOut.write('</p>\n')
         print('found across ' + str(nInt) + ' mutants: ' + str(nHits))
         if verbose == True:
+            verboseOut.write('</body>\n</html>\n')
             verboseOut.close()
+    summaryOut.write('</body>\n</html>\n')
     print('done.')
 
 if __name__ == '__main__':
