@@ -13,7 +13,7 @@ IN THIS CLAUSE, CSIRO INCLUDES ANY THIRD PARTY AUTHOR OR OWNER OF ANY PART OF TH
 Third Party Components
 The following third party components are distributed with the Software.  You agree to comply with the license terms for these components as part of accessing the Software.  Other third party software may also be identified in separate files distributed with the Software.
 ___________________________________________________________________
-Python 2.7
-https://www.python.org/download/releases/2.7/license/
+Python 3.x
+https://docs.python.org/3.9/license.html
 This software GPL compatible
 ___________________________________________________________________
