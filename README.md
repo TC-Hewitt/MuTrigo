@@ -86,14 +86,12 @@ for WT, SNPlogger can be run on already created pileup:
 
 for mutants, pileups can be created on the fly and piped directly to SNPlogger.
 
-one by one:
-```
-samtools mpileup -a -BQ0 -f WT_assembly.fasta mut1.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o mut1.snp.log
-```    
-or in a loop:
+in a loop:
 ```
 for i in mut{1..3}; do samtools mpileup -a -BQ0 -f WT_assembly.fasta ${i}.rmdup.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log; done
 ```
+or in a parallel job
+
 note that SNPlogger will print a summary of SNP statistics to the screen upon completion of each file. To save these stats, use ">" to redirect standard output to a file:
 ```
 for i in m{1..3}; do samtools mpileup -a -BQ0 -f WT_assembly.fasta ${i}.bam | python SNPlogger.pyc -b WT.noise.log -o ${i}.snp.log > ${i}.stats.txt; done
@@ -108,25 +106,28 @@ run "python SNPtracker.pyc -h" to see options. E.g. to only report polymorphisms
 ```
 python SNPtracker.pyc -w WT.snp.log -m mut1.snp.log mut2.snp.log mut3.snp.log -s C\>T G\>A indel -f 0.9 -v T -t 2
 ```
-This will create a "SNPtracker.summary" report whose output looks like the following:
+This will create a "SNPtracker_summary.html" report whose output might look like the following:
 	
-	# wildtypes: WT.snp.log
-	# mutants: mut1.snp.log, mut2.snp.log, mut3.snp.log
-	# selected: C>T, G>A, indel
-	# filtered: 0.9
-	# proximal: OFF
-	# tolerate: 2
+	<summary>
 	
-	### polymorphic in 3 mutants ###
+	<parameters>
+	wildtypes: WT.snp.log
+	mutants: mut1.snp.log, mut2.snp.log, mut3.snp.log
+	selected: C>T, G>A, indel
+	filtered: 0.9
+	proximal: OFF
+	tolerate: 2
+	
+	<polymorphic in 3 mutants>
 	contig_5565     (mut1.snp.log, mut2.snp.log, mut3.snp.log)
 	
-	### polymorphic in 2 mutants ###
+	<polymorphic in 2 mutants>
 	contig_8725     (mut1.snp.log, mut3.snp.log)
 	contig_1252     (mut2.snp.log, mut3.snp.log)
 
 If the "-v" option is set to true, the detailed reports generated display the coordinate and type of polymorphisms found in each of the mutants for a given candidate contig/sequence. A report is generated for each N>1. i.e. if there are 5 mutants, SNPtracker will create an N5.report, N4.report, N3.report and N2.report. That is unless a lower limit is specified with the "-n" option. An example of an N2.report may look like the following:
 
-	### poymorphic in 2 mutants ###
+	<polymorphic in 2 mutants>
 
 	<contig_8725>
 	mut1.snp.log [(1200, G>A, 0.98)]
