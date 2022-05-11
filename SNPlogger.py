@@ -7,6 +7,7 @@
 from __future__ import division
 from numpy.random import randint
 import argparse, sys, re, csv
+csv.field_size_limit(sys.maxsize)
 
 def main():
 

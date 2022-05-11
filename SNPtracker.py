@@ -12,6 +12,7 @@
 # for each combination subset of mutant sets, the intersection is found and written to a summary report as well as a detailed report if option given
 
 import argparse, sys, csv, math, re, itertools
+csv.field_size_limit(sys.maxsize)
 
 def main():
 
