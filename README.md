@@ -1,5 +1,5 @@
 # MuTrigo
-This pipeline was optimised for mutagen induced SNP/indel discovery in sequence data from exome capture experiments. However, flexible options allow wide application for variant analysis in any deep sequencing data.
+This pipeline was optimised for mutagen induced SNP/indel discovery in short-read sequence data from exome capture experiments. However, flexible options allow wider application in most sequencing experiments involving alignment and variant calling against a reference. It provides a streamlined method to quickly identify contigs, transcripts or genomic regions on which multiple independent mutations can be detected across multiple individuals in whole exome or genome read mapping data.
 
 ## Tool descriptions
 **Noisefinder.py**
